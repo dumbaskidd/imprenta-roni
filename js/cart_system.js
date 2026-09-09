@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cartButtons.forEach(btn => {
             // Clone to remove all previous event listeners (including the old hijack)
             const newBtn = btn.cloneNode(true);
+            newBtn.classList.remove('ajax_add_to_cart', 'add_to_cart_button', 'single_add_to_cart_button');
             btn.parentNode.replaceChild(newBtn, btn);
             
             newBtn.addEventListener('click', function(e) {
