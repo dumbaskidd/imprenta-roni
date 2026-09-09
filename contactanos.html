@@ -302,36 +302,36 @@ var wc_cart_fragments_params = {"ajax_url":"\/wp-admin\/admin-ajax.php","wc_ajax
 
 
 <script src="/js/cart_system.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Intercept the contact form submission
-    const forms = document.querySelectorAll('.wpcf7-form, form[action*="wp-json"]');
-    forms.forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const nameInput = form.querySelector('input[name="your-name"]');
-            const emailInput = form.querySelector('input[name="your-email"]');
-            const phoneInput = form.querySelector('input[name="your-phone"]');
-            const messageInput = form.querySelector('textarea[name="your-message"]');
-            
-            const name = nameInput ? nameInput.value : '';
-            const email = emailInput ? emailInput.value : '';
-            const phone = phoneInput ? phoneInput.value : '';
-            const message = messageInput ? messageInput.value : '';
-            
-            const subject = encodeURIComponent('Consulta de ' + name + ' - Imprenta Roni');
-            const body = encodeURIComponent(
-                'Nombre: ' + name + '\n' +
-                'Email: ' + email + '\n' +
-                'Teléfono: ' + phone + '\n\n' +
-                'Mensaje:\n' + message
-            );
-            
-            window.location.href = 'mailto:weare@imprentaroni.shop?subject=' + subject + '&body=' + body;
-        });
-    });
-});
+document.addEventListener('submit', function(e) {
+    const form = e.target.closest('form');
+    if (form && (form.classList.contains('wpcf7-form') || form.action.includes('wp-json'))) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+        
+        const nameInput = form.querySelector('input[name="your-name"]');
+        const emailInput = form.querySelector('input[name="your-email"]');
+        const phoneInput = form.querySelector('input[name="your-phone"]');
+        const messageInput = form.querySelector('textarea[name="your-message"]');
+        
+        const name = nameInput ? nameInput.value : '';
+        const email = emailInput ? emailInput.value : '';
+        const phone = phoneInput ? phoneInput.value : '';
+        const message = messageInput ? messageInput.value : '';
+        
+        const subject = encodeURIComponent('Consulta de ' + name + ' - Imprenta Roni');
+        const body = encodeURIComponent(
+            'Nombre: ' + name + '\n' +
+            'Email: ' + email + '\n' +
+            'Teléfono: ' + phone + '\n\n' +
+            'Mensaje:\n' + message
+        );
+        
+        window.location.href = 'mailto:weare@imprentaroni.shop?subject=' + subject + '&body=' + body;
+    }
+}, true); // CAPTURE PHASE!
 </script>
+
 <script src="js/cart_system.js"></script></body></html><!-- Page optimized by LiteSpeed Cache @2026-09-08 00:53:24 --><!-- Page cached by LiteSpeed Cache 7.9 on 2026-09-08 00:53:23 -->

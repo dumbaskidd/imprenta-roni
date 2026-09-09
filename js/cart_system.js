@@ -28,54 +28,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Removing old WhatsApp interceptors and replacing with cart logic
-    function bindCartButtons() {
-        const cartButtons = document.querySelectorAll('.add_to_cart_button, .single_add_to_cart_button, .wd-add-btn a');
-        cartButtons.forEach(btn => {
-            // Clone to remove all previous event listeners (including the old hijack)
-            const newBtn = btn.cloneNode(true);
-            newBtn.classList.remove('ajax_add_to_cart', 'add_to_cart_button', 'single_add_to_cart_button');
-            btn.parentNode.replaceChild(newBtn, btn);
+    // Capture-phase listener to intercept add to cart BEFORE WooCommerce
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.add_to_cart_button, .single_add_to_cart_button, .wd-add-btn a');
+        if (btn) {
+            // STOP WooCommerce from seeing this click
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
             
-            newBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                let productName = this.getAttribute('aria-label') || this.getAttribute('data-product_title') || '';
-                let priceText = '0';
-                
-                const productBlock = this.closest('.product');
-                if (productBlock) {
-                    if (!productName) {
-                        const titleEl = productBlock.querySelector('.woocommerce-loop-product__title, .product_title');
-                        if (titleEl) productName = titleEl.textContent.trim();
-                    }
-                    const priceEl = productBlock.querySelector('.price .amount bdi, .price .amount');
-                    if (priceEl) {
-                        priceText = priceEl.textContent.replace(/[^0-9.]/g, '');
-                    }
+            // Remove woocommerce loading classes if they got added
+            btn.classList.remove('loading');
+            
+            let productName = btn.getAttribute('aria-label') || btn.getAttribute('data-product_title') || '';
+            let priceText = '0';
+            
+            const productBlock = btn.closest('.product');
+            if (productBlock) {
+                if (!productName) {
+                    const titleEl = productBlock.querySelector('.woocommerce-loop-product__title, .product_title');
+                    if (titleEl) productName = titleEl.textContent.trim();
                 }
-                
-                const price = parseFloat(priceText) || 0;
-                addToCart({ name: productName || 'Producto Seleccionado', price: price });
-                openCartModal(); // Auto open cart on add
-            });
-        });
-    }
+                const priceEl = productBlock.querySelector('.price .amount bdi, .price .amount');
+                if (priceEl) {
+                    priceText = priceEl.textContent.replace(/[^0-9.]/g, '');
+                }
+            }
+            
+            const price = parseFloat(priceText) || 0;
+            addToCart({ name: productName || 'Producto Seleccionado', price: price });
+            openCartModal(); // Auto open cart on add
+        }
+    }, true); // Use capture phase!
 
-    // Hijack the cart icon to open our modal
-    function bindCartIcon() {
-        const cartLinks = document.querySelectorAll('.wd-header-cart a, a[href*="carrito"], a[href*="cart"]');
-        cartLinks.forEach(link => {
-            const newLink = link.cloneNode(true);
-            if(link.parentNode) link.parentNode.replaceChild(newLink, link);
-            newLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                openCartModal();
-            });
-        });
-    }
+    // Capture-phase listener for cart icons
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('.wd-header-cart a, a[href*="carrito"], a[href*="cart"]');
+        if (link && !e.target.closest('#roni-cart-modal')) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            openCartModal();
+        }
+    }, true);
     
     // Update badge and total
     function updateCartUI() {
@@ -214,22 +209,20 @@ document.addEventListener('DOMContentLoaded', function() {
         waButtons.forEach(btn => {
             btn.href = 'https://wa.me/51991104943?text=Hola%20Imprenta%20Roni,%20deseo%20asesor%C3%ADa';
         });
-
-        // Intercept ht-ctc plugin clicks
-        document.body.addEventListener('click', function(e) {
-            const ctc = e.target.closest('.ht-ctc-chat, .ht-ctc');
-            if (ctc) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.open('https://wa.me/51991104943?text=Hola%20Imprenta%20Roni,%20deseo%20asesor%C3%ADa', '_blank');
-            }
-        }, true);
     }
 
-    // Initialize all bindings after a small delay to ensure WooCommerce scripts ran
+    // Capture-phase listener for ht-ctc plugin clicks
+    document.addEventListener('click', function(e) {
+        const ctc = e.target.closest('.ht-ctc-chat, .ht-ctc');
+        if (ctc) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            window.open('https://wa.me/51991104943?text=Hola%20Imprenta%20Roni,%20deseo%20asesor%C3%ADa', '_blank');
+        }
+    }, true);
+
     setTimeout(() => {
-        bindCartButtons();
-        bindCartIcon();
         fixWhatsAppButtons();
         updateCartUI();
     }, 500);
