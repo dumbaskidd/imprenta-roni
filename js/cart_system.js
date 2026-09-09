@@ -227,3 +227,5 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCartUI();
     }, 500);
 });
+
+document.addEventListener("submit", function(e) { if(e.target.closest("form.cart")) { e.preventDefault(); e.stopPropagation(); } }, true);
